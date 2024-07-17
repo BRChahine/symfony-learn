@@ -28,9 +28,26 @@ class DogController extends AbstractController{
 
 
     #[Route("/api/dog", methods:'POST')]
-    public function newdog(#[MapRequestPayload]Dog $dog){
+    public function newdog(#[MapRequestPayload] Dog $dog){
         $repo = new DogRepository(); 
         $repo->persist($dog);
         return $this->json($dog, 201);
+    }
+
+    #[Route("/api/dog/{id}", methods:'DELETE')]
+    public function delete(int $id){
+        $repo = new DogRepository();
+        $this->one($id);
+        $repo->remove($id);
+        return $this->json(null, 204);
+    }
+    #[Route("/api/dog/{id}", methods:'PUT')]
+    public function put(int $id, #[MapRequestPayload] Dog $dog){
+        $this->one($id);
+        $dog->setId($id);
+        $repo = new DogRepository(); 
+        $repo->update($dog);
+        return $this->json($dog); 
+
     }
 }    

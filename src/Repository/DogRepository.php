@@ -34,14 +34,12 @@ class DogRepository{
     }
 
     public function persist(Dog $dog){
-        $query = $this->connection->prepare('INSERT INTO dog (name,breed,birthdate) VALUES(:nom, :race, :anniversaire)');
-        $name = $dog->getName();
-        $breed = $dog->getBreed();
-        $birthdate = $dog->getBirthDate()->format("Y-m-d");
-        $query->bindValue(':nom', $name);
-        $query->bindValue(':race', $breed);
-        $query->bindValue(':anniversaire', $birthdate);
+        $query = $this->connection->prepare('INSERT INTO dog (name,breed,birthdate) VALUES(:name, :breed, :birthdate)');
+        $query->bindValue(':name', $dog->getName());
+        $query->bindValue(':breed', $dog->getBreed());
+        $query->bindValue(':birthdate', $dog->getBirthdate()->format('Y-m-d'));
         $query->execute();
+        //On récupère l'id auto incrémenté pour l'assigner au chien qu'on vient de faire persister
         $dog->setId($this->connection->lastInsertId());
     }
     public function findByid(int $id):?Dog{
@@ -56,6 +54,21 @@ class DogRepository{
                 new \DateTime($line['birthdate'])
             );
         }
-        
+        return null;
+    }
+
+    public function remove(int $id):void{
+        $query = $this->connection->prepare('DELETE FROM dog WHERE id = :id ');
+        $query->bindValue(":id",$id);
+        $query->execute();
+    }
+
+    public function update(Dog $dog):void{
+        $query = $this->connection->prepare('UPDATE dog SET name = :name, breed = :breed, birthdate = :birthdate WHERE id = :id');
+        $query->bindValue(':name', $dog->getName());
+        $query->bindValue(':breed', $dog->getBreed());
+        $query->bindValue(':birthdate', $dog->getBirthdate()->format('Y-m-d'));
+        $query->bindValue(':id', $dog->getId());
+        $query->execute();
     }
 }
